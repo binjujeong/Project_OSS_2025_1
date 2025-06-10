@@ -1,40 +1,57 @@
-from budget import Budget
+import tkinter as tk
+import threading
+import time
+import random
 
+class BudgetApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("가계부")
+        self.root.geometry("400x400")
 
-def main():
-    budget = Budget()
+        # 원래 배경 저장
+        self.default_bg = self.root.cget("bg")
 
-    while True:
-        print("==== 간단 가계부 ====")
-        print("1. 지출 추가")
-        print("2. 지출 목록 보기")
-        print("3. 총 지출 보기")
-        print("4. 종료")
-        choice = input("선택 > ")
+        # 금액 입력창
+        self.amount_label = tk.Label(root, text="금액:")
+        self.amount_label.pack()
+        self.amount_entry = tk.Entry(root)
+        self.amount_entry.pack()
 
-        if choice == "1":
-            category = input("카테고리 (예: 식비, 교통 등): ")
-            description = input("설명: ")
-            try:
-                amount = int(input("금액(원): "))
-            except ValueError:
-                print("잘못된 금액입니다.\n")
-                continue
-            budget.add_expense(category, description, amount)
+        # 추가 버튼
+        self.add_button = tk.Button(root, text="지출 추가", command=self.add_expense)
+        self.add_button.pack()
 
-        elif choice == "2":
-            budget.list_expenses()
+        # 지출 내역 표시
+        self.expense_list = tk.Listbox(root)
+        self.expense_list.pack(fill="both", expand=True)
 
-        elif choice == "3":
-            budget.total_spent()
+    def add_expense(self):
+        try:
+            amount = int(self.amount_entry.get())
+            self.expense_list.insert(tk.END, f"{amount}원 지출")
 
-        elif choice == "4":
-            print("가계부를 종료합니다.")
-            break
+            # 💥 5만원 이상이면 눈뽕 모드 발동!
+            if amount >= 50000:
+                self.eye_blast_mode()
 
-        else:
-            print("잘못된 선택입니다.\n")
+            self.amount_entry.delete(0, tk.END)
+        except ValueError:
+            self.expense_list.insert(tk.END, "❌ 잘못된 금액 입력")
 
+    def eye_blast_mode(self):
+        def blast():
+            colors = ["red", "blue", "green", "yellow", "magenta", "cyan", "orange"]
+            end_time = time.time() + 10
+            while time.time() < end_time:
+                color = random.choice(colors)
+                self.root.configure(bg=color)
+                time.sleep(0.2)
+            self.root.configure(bg=self.default_bg)
+
+        threading.Thread(target=blast).start()
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = BudgetApp(root)
+    root.mainloop()sss
